@@ -1,21 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using MassageManagementSystem.Models;
 
 namespace MassageManagementSystem.Models.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public required DbSet<Therapists> Therapists { get; set; }
-        public required DbSet<Booking> Bookings { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<Therapists> Therapists { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<PromoCode> PromoCodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            // Seed some therapist data.
             modelBuilder.Entity<Therapists>().HasData(
-                new Therapists { Id = 1, Name = "John Doe", Specialty = "Swedish Massage" },
-                new Therapists { Id = 2, Name = "Jane Smith", Specialty = "Deep Tissue" }
+               new Therapists { Id = 1, Name = "John Doe", Specialty = "Swedish Massage", Location = "123 Main St" },
+               new Therapists { Id = 2, Name = "Jane Smith", Specialty = "Deep Tissue", Location = "456 Elm St" }
+            );
+            // Seed a promo code.
+            modelBuilder.Entity<PromoCode>().HasData(
+               new PromoCode { Id = 1, Code = "WELCOME10", DiscountAmount = 10, IsActive = true }
             );
         }
     }
-
-
 }
