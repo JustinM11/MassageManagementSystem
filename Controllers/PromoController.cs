@@ -17,6 +17,7 @@ namespace MassageManagementSystem.Controllers
             _context = context;
         }
 
+        // POST: /api/promo/apply
         [HttpPost("apply")]
         public async Task<IActionResult> ApplyPromoCode([FromBody] string code)
         {
@@ -24,7 +25,7 @@ namespace MassageManagementSystem.Controllers
             if (promo == null)
                 return BadRequest("Invalid or inactive promo code.");
 
-            return Ok(new { Discount = promo.DiscountAmount });
+            return Ok(new { discount = promo.DiscountAmount });
         }
     }
 }

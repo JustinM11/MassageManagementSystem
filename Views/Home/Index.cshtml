@@ -1,0 +1,62 @@
+﻿@model List<MassageManagementSystem.Models.Therapists>
+@{
+    ViewData["Title"] = "Our Therapists";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Our Therapists</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Specialty</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var therapist in Model)
+        {
+            <tr>
+                <td>@therapist.Name</td>
+                <td>@therapist.Specialty</td>
+                <td>@therapist.Location</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Therapist Locations</h3>
+<div id="map" style="height: 400px; width: 100%;"></div>
+
+@section Scripts {
+    <!-- Include the Google Maps JavaScript API with your API key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+    <script>
+        function initMap() {
+            // Set a default center (for example, Toronto)
+            var defaultCenter = { lat: 43.6532, lng: -79.3832 };
+            var mapOptions = {
+                zoom: 10,
+                center: defaultCenter
+            };
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            // Pass the model (therapists list) from the server to JavaScript.
+            // Use Json.Serialize (or Json.Encode) to convert to a JSON string.
+            var therapists = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+
+            // Loop over the therapist list and place markers on the map.
+            therapists.forEach(function (therapist) {
+                var marker = new google.maps.Marker({
+                    position: { lat: parseFloat(therapist.latitude), lng: parseFloat(therapist.longitude) },
+                    map: map,
+                    title: therapist.name + " - " + therapist.specialty
+                });
+            });
+        }
+
+        // Initialize the map after the page loads.
+        google.maps.event.addDomListener(window, 'load', initMap);
+    </script>
+}
