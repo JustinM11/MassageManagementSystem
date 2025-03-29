@@ -8,24 +8,26 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Use AddControllersWithViews() if you serve Razor Views.
+// Use AddControllersWithViews() to serve Razor Views.
 builder.Services.AddControllersWithViews();
 
-// Configure the DbContext with SQL Server.
+// Configure the DbContext with MySQL using the Pomelo provider.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("MySqlConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySqlConnection"))
+    )
+);
 
 // Register ASP.NET Core Identity for ApplicationUser.
-// This makes UserManager<ApplicationUser> and SignInManager<ApplicationUser> available.
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Optionally configure Cookie Authentication (if you want login/logout using cookies).
+// Configure cookie authentication.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        // If your AuthController is serving views, consider setting these to /Auth/Login, /Auth/AccessDenied
         options.LoginPath = "/Auth/Login";
         options.AccessDeniedPath = "/Auth/AccessDenied";
     });
@@ -50,10 +52,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map API controllers (if you have any).
+// Map API controllers and the default MVC route.
 app.MapControllers();
-
-// Map the default MVC route (for Razor views).
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
