@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 namespace MassageManagementSystem.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class PaymentController : ControllerBase
+    [Route("[controller]")]
+    public class PaymentController : Controller
     {
         private readonly IPaymentService _paymentService;
 
@@ -16,9 +16,11 @@ namespace MassageManagementSystem.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpPost("process")]
-        public async Task<IActionResult> ProcessPayment([FromBody] PaymentRequest paymentRequest)
+        // POST: /Payment/Process
+        [HttpPost("Process")]
+        public async Task<IActionResult> Process(PaymentRequest paymentRequest)
         {
+            // call your payment service
             var transactionId = await _paymentService.ProcessPayment(paymentRequest.Amount);
             return Ok(new { TransactionId = transactionId });
         }

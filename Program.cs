@@ -1,24 +1,35 @@
+using MassageManagementSystem.Models;
 using MassageManagementSystem.Models.Data;
-using MassageManagementSystem.Services; 
+using MassageManagementSystem.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Use AddControllers() for API-only; use AddControllersWithViews() if you also serve Razor Views.
-builder.Services.AddControllers();
+// Use AddControllersWithViews() to serve Razor Views.
+builder.Services.AddControllersWithViews();
 
-// Configure the DbContext with SQL Server.
+// Configure the DbContext with MySQL using the Pomelo provider.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("MySqlConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySqlConnection"))
+    )
+);
 
-// Register authentication (using Cookie Authentication as an example).
+// Register ASP.NET Core Identity for ApplicationUser.
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// Configure cookie authentication.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/api/auth/login";
-        options.AccessDeniedPath = "/api/auth/accessdenied";
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
     });
 
 // Register custom services for payment and email processing.
@@ -41,6 +52,10 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map API controllers and the default MVC route.
 app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

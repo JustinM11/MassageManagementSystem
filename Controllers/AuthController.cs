@@ -5,9 +5,7 @@ using System.Threading.Tasks;
 
 namespace MassageManagementSystem.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -18,34 +16,64 @@ namespace MassageManagementSystem.Controllers
             _signInManager = signInManager;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        // GET: /Auth/Register
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        // POST: /Auth/Register
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return View(model);
 
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                return Ok("User registered successfully.");
+                // Optionally sign in the user after registration
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Index", "Home");
             }
-            return BadRequest(result.Errors);
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+            return View(model);
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        // GET: /Auth/Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: /Auth/Login
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return View(model);
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                // In a production system, you might return a JWT token.
-                return Ok("User logged in successfully.");
+                return RedirectToAction("Index", "Home");
             }
-            return Unauthorized();
+            ModelState.AddModelError("", "Invalid login attempt.");
+            return View(model);
+        }
+
+        // GET: /Auth/Logout
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
