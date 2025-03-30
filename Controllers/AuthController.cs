@@ -1,7 +1,10 @@
 ﻿using MassageManagementSystem.Models;
+using MassageManagementSystem.Models.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MassageManagementSystem.Controllers
 {
@@ -9,11 +12,16 @@ namespace MassageManagementSystem.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ApplicationDbContext _context;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AuthController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         // GET: /Auth/Register
@@ -23,14 +31,12 @@ namespace MassageManagementSystem.Controllers
             return View();
         }
 
+        // POST: /Auth/Register
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel model)
         {
-            Console.WriteLine("POST Register hit!");
-
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("ModelState invalid");
                 return View(model);
             }
 
@@ -39,20 +45,17 @@ namespace MassageManagementSystem.Controllers
 
             if (result.Succeeded)
             {
-                Console.WriteLine("User created successfully");
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("UserPage", "Auth");
             }
 
             foreach (var error in result.Errors)
             {
-                Console.WriteLine("Identity error: " + error.Description);
                 ModelState.AddModelError("", error.Description);
             }
 
             return View(model);
         }
-
 
         // GET: /Auth/Login
         [HttpGet]
@@ -69,10 +72,12 @@ namespace MassageManagementSystem.Controllers
                 return View(model);
 
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
+
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("UserPage", "Auth");
             }
+
             ModelState.AddModelError("", "Invalid login attempt.");
             return View(model);
         }
@@ -83,6 +88,15 @@ namespace MassageManagementSystem.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        // GET: /Auth/UserPage (Dashboard)
+        [Authorize]
+        [HttpGet]
+        public IActionResult UserPage()
+        {
+            var therapists = _context.Therapists.ToList();
+            return View("~/Views/UserPage/userpage.cshtml", therapists);
         }
     }
 }
