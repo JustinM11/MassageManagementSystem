@@ -24,14 +24,16 @@
     }
 
     .sign-in {
-        position: absolute;
-        top: 20px;
-        right: 30px;
-        font-size: 0.5em;
+        font-size: 0.6em;
         font-style: italic;
         color: #444;
         text-decoration: none;
     }
+
+        .sign-in:hover {
+            text-decoration: underline;
+        }
+
 
     .main-section {
         padding: 60px 20px;
@@ -144,8 +146,12 @@
 
 <header>
     Healing Massage
-    <a class="sign-in" asp-controller="Auth" asp-action="Login">Sign In</a>
+    <div style="position: absolute; top: 20px; right: 30px;">
+        <a class="sign-in me-3" asp-controller="Auth" asp-action="Login">Sign In</a>
+        <a class="sign-in" asp-controller="Auth" asp-action="Register">Register</a>
+    </div>
 </header>
+
 
 <section class="main-section">
     <div class="intro-container">
