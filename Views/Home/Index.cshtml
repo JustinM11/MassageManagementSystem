@@ -1,62 +1,232 @@
 ﻿@model List<MassageManagementSystem.Models.Therapists>
 @{
-    ViewData["Title"] = "Our Therapists";
+    ViewBag.Title = "Healing Massage";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Our Therapists</h2>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Specialty</th>
-            <th>Location</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var therapist in Model)
+<style>
+    body {
+        font-family: 'Lora', serif;
+        background-color: #fafafa;
+        color: #2e2e2e;
+    }
+
+    header {
+        background-color: #d7e6e9;
+        padding: 20px;
+        font-family: 'Playfair Display', serif;
+        font-size: 2em;
+        font-style: italic;
+        text-align: center;
+        position: relative;
+    }
+
+    .sign-in {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 0.5em;
+        font-style: italic;
+        color: #444;
+        text-decoration: none;
+    }
+
+    .main-section {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .intro-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 50px;
+        margin-bottom: 50px;
+    }
+
+        .intro-container img {
+            width: 200px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+    .text-content {
+        max-width: 600px;
+        text-align: left;
+        font-style: italic;
+        line-height: 1.7em;
+    }
+
+        .text-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: #1e2d38;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+    .call-to-action {
+        font-style: italic;
+        font-size: 1.3em;
+        margin-bottom: 30px;
+        color: #3d3d3d;
+    }
+
+    .book-button {
+        padding: 12px 28px;
+        background-color: #3e9db3;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-style: italic;
+        font-size: 1em;
+        box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.15);
+        transition: background-color 0.3s ease;
+    }
+
+        .book-button:hover {
+            background-color: #2c7d91;
+        }
+
+    .therapists-section {
+        padding: 60px 20px;
+        background-color: #f5f9f9;
+    }
+
+    .therapists-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8em;
+        font-style: italic;
+        margin-bottom: 30px;
+        color: #2a3b47;
+        text-align: center; /* Centers the text */
+    }
+
+    .therapists {
+        display: flex;
+        justify-content: center;
+        gap: 50px;
+        flex-wrap: wrap;
+    }
+
+    .massage-logo {
+        width: 300px;
+        height: auto;
+        border-radius: 8px; /* optional for soft corners */
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1); /* optional for elegance */
+    }
+
+
+    .therapist-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        width: 220px;
+        transition: transform 0.3s ease;
+    }
+
+        .therapist-card img {
+            width: 100%;
+            height: auto;
+            max-height: 280px; /* adjust this if you want it shorter */
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+</style>
+
+<header>
+    Healing Massage
+    <a class="sign-in" href="#">Sign In</a>
+</header>
+
+<section class="main-section">
+    <div class="intro-container">
+        <img src="~/image/logomassage.png" asp-append-version="true" alt="Healing Massage Icon" class="massage-logo" />
+        <div class="text-content">
+            <h2>Relax. Rejuvenate. Restore.</h2>
+            <p>
+                At <strong><em>HEALING MASSAGE</em></strong>, we believe in the healing power of touch.
+                Whether you're seeking relief from everyday stress, chronic tension, or simply looking to unwind,
+                our skilled massage therapists are here to help you reconnect with your body and mind.
+            </p>
+            <p>
+                Step into a space of serenity—where your well-being is our top priority.
+                From Swedish to deep tissue, every session is personalized to meet your unique needs.
+            </p>
+        </div>
+    </div>
+
+    <div class="call-to-action">
+        Feel better. Move better. Live better.<br />
+        Book your moment of peace today.
+    </div>
+    <button class="book-button">Book an Appointment</button>
+</section>
+
+<section class="therapists-section">
+    <div class="therapists-title">Our Therapists</div>
+    <div class="therapists">
+        @for (int i = 0; i < Model.Count; i++)
         {
-            <tr>
-                <td>@therapist.Name</td>
-                <td>@therapist.Specialty</td>
-                <td>@therapist.Location</td>
-            </tr>
-        }
-    </tbody>
-</table>
+            var therapist = Model[i];
 
-<h3>Therapist Locations</h3>
-<div id="map" style="height: 400px; width: 100%;"></div>
-
-@section Scripts {
-    <!-- Include the Google Maps JavaScript API with your API key -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
-    <script>
-        function initMap() {
-            // Set a default center (for example, Toronto)
-            var defaultCenter = { lat: 43.6532, lng: -79.3832 };
-            var mapOptions = {
-                zoom: 10,
-                center: defaultCenter
+            // Assign image manually based on position/index
+            string imageName = i switch
+            {
+                0 => "therapist1.png",
+                1 => "therapist2.png",
+                _ => "default.png"
             };
-            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
-            // Pass the model (therapists list) from the server to JavaScript.
-            // Use Json.Serialize (or Json.Encode) to convert to a JSON string.
-            var therapists = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+            var imagePath = Url.Content("~/image/therapists/" + imageName);
 
-            // Loop over the therapist list and place markers on the map.
-            therapists.forEach(function (therapist) {
-                var marker = new google.maps.Marker({
-                    position: { lat: parseFloat(therapist.latitude), lng: parseFloat(therapist.longitude) },
-                    map: map,
-                    title: therapist.name + " - " + therapist.specialty
-                });
-            });
+            <div class="therapist-card">
+                <img src="@imagePath" alt="@therapist.Name's profile picture" class="profile-img" />
+                <h5>@therapist.Name</h5>
+                <p>@therapist.Specialty</p>
+            </div>
         }
+    </div>
+</section>
 
-        // Initialize the map after the page loads.
-        google.maps.event.addDomListener(window, 'load', initMap);
-    </script>
-}
+
+
+@* @section Scripts { *@
+@*     <!-- Include the Google Maps JavaScript API with your API key --> *@
+@*     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script> *@
+@*     <script> *@
+@*         function initMap() { *@
+@*             // Set a default center (for example, Toronto) *@
+@*             var defaultCenter = { lat: 43.6532, lng: -79.3832 }; *@
+@*             var mapOptions = { *@
+@*                 zoom: 10, *@
+@*                 center: defaultCenter *@
+@*             }; *@
+@*             var map = new google.maps.Map(document.getElementById('map'), mapOptions); *@
+
+@*             // Pass the model (therapists list) from the server to JavaScript. *@
+@*             // Use Json.Serialize (or Json.Encode) to convert to a JSON string. *@
+@*             var therapists = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model)); *@
+
+@*             // Loop over the therapist list and place markers on the map. *@
+@*             therapists.forEach(function (therapist) { *@
+@*                 var marker = new google.maps.Marker({ *@
+@*                     position: { lat: parseFloat(therapist.latitude), lng: parseFloat(therapist.longitude) }, *@
+@*                     map: map, *@
+@*                     title: therapist.name + " - " + therapist.specialty *@
+@*                 }); *@
+@*             }); *@
+@*         } *@
+
+@*         // Initialize the map after the page loads. *@
+@*         google.maps.event.addDomListener(window, 'load', initMap); *@
+@*     </script> *@
+@* } *@
