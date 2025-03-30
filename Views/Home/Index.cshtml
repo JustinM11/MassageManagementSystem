@@ -144,7 +144,7 @@
 
 <header>
     Healing Massage
-    <a class="sign-in" href="#">Sign In</a>
+    <a class="sign-in" asp-controller="Auth" asp-action="Login">Sign In</a>
 </header>
 
 <section class="main-section">
@@ -181,9 +181,9 @@
             // Assign image manually based on position/index
             string imageName = i switch
             {
-                0 => "therapist1.png",
-                1 => "therapist2.png",
-                _ => "default.png"
+                0 => "therapist2.png",
+                1 => "therapist1.png",
+                _ => "default.jpg"
             };
 
             var imagePath = Url.Content("~/image/therapists/" + imageName);
