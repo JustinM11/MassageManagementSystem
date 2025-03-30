@@ -23,27 +23,36 @@ namespace MassageManagementSystem.Controllers
             return View();
         }
 
-        // POST: /Auth/Register
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel model)
         {
+            Console.WriteLine("POST Register hit!");
+
             if (!ModelState.IsValid)
+            {
+                Console.WriteLine("ModelState invalid");
                 return View(model);
+            }
 
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
+
             if (result.Succeeded)
             {
-                // Optionally sign in the user after registration
+                Console.WriteLine("User created successfully");
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Home");
             }
+
             foreach (var error in result.Errors)
             {
+                Console.WriteLine("Identity error: " + error.Description);
                 ModelState.AddModelError("", error.Description);
             }
+
             return View(model);
         }
+
 
         // GET: /Auth/Login
         [HttpGet]
