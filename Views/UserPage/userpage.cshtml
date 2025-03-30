@@ -1,0 +1,180 @@
+﻿@model List<MassageManagementSystem.Models.Therapists>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<MassageManagementSystem.Models.ApplicationUser> UserManager
+@inject SignInManager<MassageManagementSystem.Models.ApplicationUser> SignInManager
+
+@{
+    ViewBag.Title = "User Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var userName = User.Identity.IsAuthenticated ? User.Identity.Name : "Guest";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Lora', serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+    }
+
+    .custom-header {
+        background-color: #d7e6e9;
+        padding: 20px 40px;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8em;
+        font-style: italic;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left {
+        font-weight: bold;
+    }
+
+    .header-right {
+        font-size: 0.8em;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        line-height: 1.3em;
+    }
+
+    .logout-link {
+        font-size: 0.9em;
+        color: #3e9db3;
+        font-style: italic;
+        text-decoration: none;
+        margin-top: 2px;
+    }
+
+        .logout-link:hover {
+            text-decoration: underline;
+            color: #2c7d91;
+        }
+
+    .main-section {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: #ffffff;
+    }
+
+    .intro-logo {
+        width: 180px;
+        height: auto;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .call-to-action {
+        font-style: italic;
+        font-size: 1.2em;
+        color: #3d3d3d;
+        margin-top: 10px;
+    }
+
+    .therapists-section {
+        background-color: #f5f9f9;
+        padding: 60px 20px;
+    }
+
+    .therapists-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6em;
+        font-style: italic;
+        margin-bottom: 30px;
+        color: #2a3b47;
+        text-align: center;
+    }
+
+    .therapists {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 30px;
+        justify-items: center;
+    }
+
+    .therapist-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        width: 100%;
+        max-width: 250px;
+        transition: transform 0.3s ease;
+    }
+
+        .therapist-card:hover {
+            transform: scale(1.03);
+        }
+
+        .therapist-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .therapist-card h5 {
+            margin: 10px 0 5px;
+            font-size: 1.1em;
+        }
+
+        .therapist-card p {
+            font-style: italic;
+            color: #666;
+            font-size: 0.95em;
+        }
+</style>
+
+<header class="custom-header">
+    <div class="header-left">Healing Massage</div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="header-right">
+            <span>Welcome, <strong>@userName</strong></span>
+            <a asp-controller="Auth" asp-action="Logout" class="logout-link">Logout</a>
+        </div>
+    }
+</header>
+
+<section class="main-section">
+    <img src="~/image/logomassage.png" asp-append-version="true" alt="Healing Massage Logo" class="intro-logo" />
+
+    <div class="call-to-action">
+        <p>We’re glad to have you back, <strong>@userName</strong>!</p>
+        <p>Reconnect with your body and mind—book your perfect massage today.</p>
+    </div>
+</section>
+
+<section class="therapists-section">
+    <div class="therapists-title">Our Therapists</div>
+    <div class="therapists">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var therapist = Model[i];
+
+            string imageName = i switch
+            {
+                0 => "therapist2.png",
+                1 => "therapist1.png",
+                _ => "default.jpg"
+            };
+
+            var imagePath = Url.Content("~/image/therapists/" + imageName);
+
+            <div class="therapist-card">
+                <img src="@imagePath" alt="@therapist.Name's profile picture" />
+                <h5>@therapist.Name</h5>
+                <p>@therapist.Specialty</p>
+            </div>
+        }
+    </div>
+</section>
