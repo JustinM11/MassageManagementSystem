@@ -16,7 +16,6 @@
 
         public bool IsConfirmed { get; set; }
 
-        // 🔽 Navigation property
-        public Therapists? Therapist { get; set; }
+        
     }
 }
