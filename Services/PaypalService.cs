@@ -71,9 +71,27 @@ namespace MassageManagementSystem.Services
                 throw new Exception($"Payment processing failed: {response.ReasonPhrase}. Details: {errorBody}");
             }
 
+            var json = await response.Content.ReadAsStringAsync();
+            dynamic paymentResult = JsonConvert.DeserializeObject(json);
 
-            // For simplicity, return a dummy transaction ID here or parse the response as needed.
-            return "PAYPAL_TXN_REAL_ID";
+            // Find the PayPal approval URL
+            string approvalUrl = null;
+            foreach (var link in paymentResult.links)
+            {
+                if (link.rel == "approval_url")
+                {
+                    approvalUrl = link.href;
+                    break;
+                }
+            }
+
+            if (approvalUrl == null)
+            {
+                throw new Exception("PayPal approval URL not found in response.");
+            }
+
+            return approvalUrl;
+
         }
 
         private async Task<string> GetAccessToken(string clientId, string secret)
