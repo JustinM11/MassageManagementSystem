@@ -5,25 +5,25 @@
 namespace MassageManagementSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNametoBooking : Migration
+    public partial class Revise : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Name",
-                table: "Bookings",
-                type: "longtext",
-                nullable: false)
-                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.AddColumn<bool>(
+                name: "IsAdmin",
+                table: "AspNetUsers",
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Name",
-                table: "Bookings");
+                name: "IsAdmin",
+                table: "AspNetUsers");
         }
     }
 }

@@ -57,5 +57,26 @@ namespace MassageManagementSystem.Controllers
                 .ToListAsync();
             return Ok(bookings);
         }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllBookings()
+        {
+            var bookings = await _context.Bookings
+                .Include(b => b.Therapist) // This brings in the related therapist
+                .ToListAsync();
+
+            var result = bookings.Select(b => new
+            {
+                b.Name,
+                b.UserId,
+                b.AppointmentTime,
+                b.IsConfirmed,
+                TherapistName = b.Therapist != null ? b.Therapist.Name : "Unknown"
+            });
+
+            return Ok(result);
+        }
+
+
     }
 }

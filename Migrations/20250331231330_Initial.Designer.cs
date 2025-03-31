@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MassageManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250329224922_Initial")]
+    [Migration("20250331231330_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -95,8 +95,25 @@ namespace MassageManagementSystem.Migrations
                     b.Property<DateTime>("AppointmentTime")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PayerId")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PaymentId")
+                        .HasColumnType("longtext");
 
                     b.Property<int>("TherapistId")
                         .HasColumnType("int");
@@ -105,6 +122,8 @@ namespace MassageManagementSystem.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TherapistId");
 
                     b.ToTable("Bookings");
                 });
@@ -301,6 +320,17 @@ namespace MassageManagementSystem.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("MassageManagementSystem.Models.Booking", b =>
+                {
+                    b.HasOne("MassageManagementSystem.Models.Therapists", "Therapist")
+                        .WithMany()
+                        .HasForeignKey("TherapistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Therapist");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

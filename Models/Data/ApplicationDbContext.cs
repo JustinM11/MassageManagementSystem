@@ -19,6 +19,11 @@ namespace MassageManagementSystem.Models.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Booking>()
+            .HasOne(b => b.Therapist)
+            .WithMany()
+            .HasForeignKey(b => b.TherapistId);
+
             // Seed sample therapist data.
             modelBuilder.Entity<Therapists>().HasData(
                 new Therapists

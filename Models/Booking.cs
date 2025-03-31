@@ -25,5 +25,8 @@
         public string? PayerId { get; set; }
 
         public DateTime? PaymentDate { get; set; }
+
+        // 🔽 Navigation property
+        public Therapists? Therapist { get; set; }
     }
 }

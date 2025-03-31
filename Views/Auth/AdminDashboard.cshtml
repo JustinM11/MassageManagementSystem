@@ -1,0 +1,286 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<MassageManagementSystem.Models.ApplicationUser> UserManager
+@inject SignInManager<MassageManagementSystem.Models.ApplicationUser> SignInManager
+
+@{
+    ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var userName = User.Identity.IsAuthenticated ? User.Identity.Name : "Admin";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Lora', serif;
+        background-color: #f9f9f9;
+        margin: 0;
+    }
+
+    .custom-header {
+        background-color: #d7e6e9;
+        padding: 20px 40px;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8em;
+        font-style: italic;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left {
+        font-weight: bold;
+    }
+
+    .header-right {
+        font-size: 0.8em;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        line-height: 1.3em;
+    }
+
+    .logout-link {
+        font-size: 0.9em;
+        color: #3e9db3;
+        font-style: italic;
+        text-decoration: none;
+        margin-top: 2px;
+    }
+
+        .logout-link:hover {
+            text-decoration: underline;
+            color: #2c7d91;
+        }
+
+    .main-section {
+        padding: 40px 20px;
+        text-align: center;
+        background-color: #fff;
+    }
+
+    .admin-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        font-style: italic;
+        color: #2a3b47;
+        margin-bottom: 20px;
+    }
+
+    .admin-section {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #f5f9f9;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .form-button {
+        padding: 12px 28px;
+        background-color: #3e9db3;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-style: italic;
+        font-size: 1em;
+        box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.15);
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .form-button:hover {
+            background-color: #2c7d91;
+        }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .admin-table th {
+            background-color: #d7e6e9;
+        }
+
+    .promo-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .promo-form {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .promo-image {
+        flex: 1;
+        text-align: center;
+    }
+
+        .promo-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+    .massage-logo {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+
+</style>
+
+<header class="custom-header">
+    <div class="header-left">Admin Panel</div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="header-right">
+            <span>Welcome, <strong>@userName</strong></span>
+            <a asp-controller="Auth" asp-action="Logout" class="logout-link">Logout</a>
+        </div>
+    }
+</header>
+
+<section class="main-section">
+    <div class="admin-title" style="margin-top: 50px;">Generate Promo Code</div>
+    <div class="admin-section promo-container">
+        <div class="promo-form">
+            <form id="promoForm">
+                <div class="form-group">
+                    <label for="code">Promo Code</label>
+                    <input type="text" id="code" class="form-control" placeholder="Enter promo code" />
+                </div>
+
+                <div class="form-group">
+                    <label for="discount">Discount (%)</label>
+                    <input type="number" id="discount" class="form-control" placeholder="e.g. 15" min="1" max="100" />
+                </div>
+
+                <button type="submit" class="form-button">Create Promo Code</button>
+                <div id="promoMessage" class="call-to-action" style="margin-top: 10px;"></div>
+            </form>
+        </div>
+
+        <div class="promo-image">
+            <img src="~/image/logomassage.png" asp-append-version="true" alt="Healing Massage Icon" class="massage-logo" />
+        </div>
+
+    </div>
+
+    <div class="admin-title">Manage Bookings</div>
+    <div class="admin-section">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Email</th>
+                    <th>Therapist</th>
+                    <th>Appointment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="bookingTable">
+                <!-- Rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById("promoForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const code = document.getElementById("code").value.trim();
+            const discount = document.getElementById("discount").value.trim();
+
+            if (!code || !discount) {
+                document.getElementById("promoMessage").innerText = "Please fill out both fields.";
+                return;
+            }
+
+            fetch("/api/promo/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ code: code, discount: parseInt(discount) })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error creating promo code.");
+                return response.text();
+            })
+            .then(result => {
+                document.getElementById("promoMessage").innerText = "🎉 Promo code created successfully!";
+                document.getElementById("promoForm").reset();
+            })
+            .catch(err => {
+                document.getElementById("promoMessage").innerText = "❌ " + err.message;
+            });
+        });
+            // Fetch all bookings when page loads
+        window.addEventListener("DOMContentLoaded", function () {
+            fetch("/api/booking/all")
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to fetch bookings.");
+                    return response.json();
+                })
+                .then(bookings => {
+                    const table = document.getElementById("bookingTable");
+                    table.innerHTML = ""; // Clear placeholder row
+
+                    if (bookings.length === 0) {
+                        table.innerHTML = "<tr><td colspan='5'>No bookings available.</td></tr>";
+                        return;
+                    }
+
+                    bookings.forEach(booking => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${booking.name}</td>
+                            <td>${booking.email || "—"}</td>
+                            <td>${booking.therapistName || "N/A"}</td>
+                            <td>${new Date(booking.appointmentTime).toLocaleString()}</td>
+                            <td>${booking.isConfirmed ? "Confirmed" : "Pending"}</td>
+                        `;
+                        table.appendChild(row);
+                    });
+                })
+                .catch(err => {
+                    document.getElementById("bookingTable").innerHTML = `<tr><td colspan="5">❌ ${err.message}</td></tr>`;
+                });
+        });
+    </script>
+}

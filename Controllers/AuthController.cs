@@ -24,14 +24,12 @@ namespace MassageManagementSystem.Controllers
             _context = context;
         }
 
-        // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Auth/Register
         [HttpPost]
         public async Task<IActionResult> Register(RegisterModel model)
         {
@@ -40,13 +38,22 @@ namespace MassageManagementSystem.Controllers
                 return View(model);
             }
 
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                IsAdmin = false // Default to user unless you want to expose this in form
+            };
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("UserPage", "Auth");
+
+                return user.IsAdmin
+                    ? RedirectToAction("AdminPage", "Auth")
+                    : RedirectToAction("UserPage", "Auth");
             }
 
             foreach (var error in result.Errors)
@@ -57,14 +64,12 @@ namespace MassageManagementSystem.Controllers
             return View(model);
         }
 
-        // GET: /Auth/Login
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Auth/Login
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
@@ -75,14 +80,17 @@ namespace MassageManagementSystem.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("UserPage", "Auth");
+                var user = await _userManager.FindByEmailAsync(model.Email);
+
+                return user != null && user.IsAdmin
+                    ? RedirectToAction("AdminPage", "Auth")
+                    : RedirectToAction("UserPage", "Auth");
             }
 
             ModelState.AddModelError("", "Invalid login attempt.");
             return View(model);
         }
 
-        // GET: /Auth/Logout
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
@@ -90,13 +98,19 @@ namespace MassageManagementSystem.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Auth/UserPage (Dashboard)
         [Authorize]
         [HttpGet]
         public IActionResult UserPage()
         {
             var therapists = _context.Therapists.ToList();
             return View("~/Views/UserPage/userpage.cshtml", therapists);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult AdminPage()
+        {
+            return View("~/Views/Auth/AdminDashboard.cshtml"); // make sure this file exists
         }
     }
 }
