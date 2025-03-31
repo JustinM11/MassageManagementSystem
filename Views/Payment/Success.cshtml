@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Booking Confirmation";
+}
+
+<h2>🎉 Payment Successful!</h2>
+<p>We're finalizing your booking...</p>
+
+<script>
+    const paymentId = "@ViewBag.PaymentId";
+    const payerId = "@ViewBag.PayerID";
+    const booking = JSON.parse(localStorage.getItem("pendingBooking"));
+
+    if (booking) {
+        booking.paymentId = paymentId;
+        booking.payerId = payerId;
+        booking.paymentDate = new Date().toISOString(); // ✅ Required by the backend
+
+        fetch("/api/booking/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(booking)
+        })
+        .then(response => {
+            if (!response.ok) return response.text().then(text => { throw new Error(text); });
+            return response.text();
+        })
+        .then(result => {
+            document.body.innerHTML = `
+                <h2>🎉 Payment & Booking Successful!</h2>
+                <p>Thank you, <strong>${booking.name}</strong>.</p>
+                <p><strong>Payment ID:</strong> ${paymentId}</p>
+                <p><strong>Payer ID:</strong> ${payerId}</p>
+                <p><strong>Appointment:</strong> ${new Date(booking.appointmentTime).toLocaleString()}</p>
+                <p><strong>Payment Date:</strong> ${new Date(booking.paymentDate).toLocaleString()}</p>
+                <p>We'll send a confirmation shortly.</p>
+                <br/>
+                <a href="/" class="form-button" style="display:inline-block; text-decoration:none; margin-top: 20px;">🏠 Back to Home</a>
+            `;
+            localStorage.removeItem("pendingBooking");
+        })
+        .catch(err => {
+            document.body.innerHTML = `<h2>⚠️ Booking Error</h2><p>${err.message}</p>`;
+        });
+    } else {
+        document.body.innerHTML = `<h2>⚠️ Booking Info Missing</h2><p>Please contact support.</p>`;
+    }
+</script>
