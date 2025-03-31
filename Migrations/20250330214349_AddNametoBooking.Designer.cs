@@ -3,6 +3,7 @@ using System;
 using MassageManagementSystem.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MassageManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250330214349_AddNametoBooking")]
+    partial class AddNametoBooking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,24 +95,11 @@ namespace MassageManagementSystem.Migrations
                     b.Property<DateTime>("AppointmentTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PayerId")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("PaymentDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("PaymentId")
                         .HasColumnType("longtext");
 
                     b.Property<int>("TherapistId")

@@ -33,10 +33,19 @@ namespace MassageManagementSystem.Controllers
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            // Send a confirmation email (replace with actual user email).
-            await _emailService.SendEmailAsync("user@example.com", "Booking Confirmation", "Your booking has been confirmed.");
+            await _emailService.SendEmailAsync(
+                booking.Email,
+                "Booking Confirmation",
+                $"Hi {booking.Name},<br><br>Your booking has been confirmed.<br><br>" +
+                $"<strong>Payment ID:</strong> {booking.PaymentId}<br>" +
+                $"<strong>Payer ID:</strong> {booking.PayerId}<br>" +
+                $"<strong>Appointment:</strong> {booking.AppointmentTime:dddd, MMMM dd, yyyy h:mm tt}<br><br>" +
+                "Thank you for booking with us!"
+            );
+
             return Ok("Booking created and email sent.");
         }
+
 
         // Retrieve bookings for a specific user.
         //[Authorize]

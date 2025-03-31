@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using Microsoft.Extensions.Configuration;
 
@@ -21,27 +23,49 @@ namespace MassageManagementSystem.Services
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {
+            var fromAddress = _configuration["Email:FromAddress"];
+            var smtpServer = _configuration["Email:SmtpServer"];
+            var smtpPort = int.Parse(_configuration["Email:SmtpPort"]);
+            var username = _configuration["Email:Username"];
+            var password = _configuration["Email:Password"];
+
             var emailMessage = new MimeMessage();
 
-            // Set the sender (From) address
-            emailMessage.From.Add(new MailboxAddress("Massage Management System", _configuration["Email:FromAddress"]));
-            // Set the recipient (To) address
-            emailMessage.To.Add(new MailboxAddress("", to));
+            emailMessage.From.Add(new MailboxAddress("Massage Management System", fromAddress));
+            emailMessage.To.Add(MailboxAddress.Parse(to));
             emailMessage.Subject = subject;
-            // You can use "plain" or "html" for text type
-            emailMessage.Body = new TextPart("html") { Text = body };
 
-            using (var client = new SmtpClient())
+            var bodyBuilder = new BodyBuilder
             {
-                // Connect to Gmail's SMTP server using the settings from configuration.
-                await client.ConnectAsync(_configuration["Email:SmtpServer"], int.Parse(_configuration["Email:SmtpPort"]), false);
-                // Authenticate with the Gmail account
-                await client.AuthenticateAsync(_configuration["Email:Username"], _configuration["Email:Password"]);
-                // Send the email
+                HtmlBody = body,
+                TextBody = StripHtmlTags(body) // fallback for non-HTML clients
+            };
+
+            emailMessage.Body = bodyBuilder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            try
+            {
+                // Use STARTTLS which Gmail expects on port 587
+                await client.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(username, password);
                 await client.SendAsync(emailMessage);
-                // Disconnect and close the connection
+            }
+            catch (Exception ex)
+            {
+                // Log or handle error as needed
+                throw new InvalidOperationException("Failed to send email.", ex);
+            }
+            finally
+            {
                 await client.DisconnectAsync(true);
             }
+        }
+
+        private string StripHtmlTags(string html)
+        {
+            // Basic fallback to plain text
+            return System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", string.Empty);
         }
     }
 }
