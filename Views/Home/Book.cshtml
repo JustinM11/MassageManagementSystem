@@ -198,6 +198,12 @@
             </div>
 
             <div class="form-group">
+                <label for="email">Your Email:</label>
+                <input type="email" id="email" class="form-control" placeholder="Enter your email" required />
+            </div>
+
+
+            <div class="form-group">
                 <label for="therapistId">Select Therapist:</label>
                 <select id="therapistId" class="form-control">
                     @foreach (var therapist in Model)
@@ -231,7 +237,7 @@
         document.getElementById("applyPromoBtn").addEventListener("click", function () {
             var promoCode = document.getElementById("promoCode").value.trim();
             if (!promoCode) {
-                alert("Please enter a promo code.");
+                document.getElementById("promoResult").innerText = "⚠️ No promo code entered. You can still book without one.";
                 return;
             }
 
@@ -244,59 +250,64 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
+                    return response.text().then(text => { throw new Error(text); });
                 }
                 return response.json();
             })
             .then(data => {
-                document.getElementById("promoResult").innerText = "Discount: " + data.discount + "% applied!";
+                document.getElementById("promoResult").innerText = "🎉 Discount: " + data.discount + "% applied!";
             })
             .catch(error => {
                 document.getElementById("promoResult").innerText = "Promo Error: " + error.message;
             });
         });
 
-        document.getElementById("bookNowBtn").addEventListener("click", function () {
+                document.getElementById("bookNowBtn").addEventListener("click", function () {
             const therapistId = document.getElementById("therapistId").value;
             const appointmentTime = document.getElementById("appointmentTime").value;
             const promoCode = document.getElementById("promoCode").value;
             const userId = document.getElementById("userId").value;
             const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
 
-            if (!therapistId || !appointmentTime || !userId) {
+            if (!name || !therapistId || !appointmentTime) {
                 alert("Please fill out all required fields.");
                 return;
             }
 
             const booking = {
                 name: name,
+                email: email, // <-- pass this to the backend
                 therapistId: parseInt(therapistId),
                 appointmentTime: appointmentTime,
-                promoCode: promoCode,
-                userId: userId
+                promoCode: promoCode || "",
+                userId: userId || null
             };
 
-            fetch("/api/booking/create", {
+            // Store booking temporarily (can also use sessionStorage)
+            localStorage.setItem("pendingBooking", JSON.stringify(booking));
+
+            // Redirect to PayPal
+            fetch("/Payment/Process", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(booking)
+                body: JSON.stringify({ amount: 49.99 }) // Replace with dynamic amount later
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    document.getElementById("bookingResult").innerText = "❌ Could not redirect to PayPal.";
                 }
-                return response.text();
-            })
-            .then(message => {
-                document.getElementById("bookingResult").innerText = "✅ " + message;
-                document.getElementById("bookingForm").reset();
-                document.getElementById("promoResult").innerText = "";
             })
             .catch(error => {
-                document.getElementById("bookingResult").innerText = "❌ Booking failed: " + error.message;
+                document.getElementById("bookingResult").innerText = "❌ Payment setup failed: " + error.message;
             });
         });
+
     </script>
 }
+
