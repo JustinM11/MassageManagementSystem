@@ -1,0 +1,417 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<MassageManagementSystem.Models.ApplicationUser> UserManager
+@inject SignInManager<MassageManagementSystem.Models.ApplicationUser> SignInManager
+@{
+    ViewBag.Title = "Manage Promo Code";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var userName = User.Identity.IsAuthenticated ? User.Identity.Name : "Admin";
+}
+<style>
+    body {
+        font-family: 'Lora', serif;
+        background-color: #f9f9f9;
+        margin: 0;
+    }
+
+    .custom-header {
+        background-color: #d7e6e9;
+        padding: 20px 40px;
+        font-family: 'Playfair Display', serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .header-left {
+        font-weight: bold;
+        font-size: 1.8em;
+        font-style: italic;
+    }
+
+    .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        font-size: 1em;
+    }
+
+    .welcome-text {
+        font-style: italic;
+        margin-bottom: 6px;
+    }
+
+    .header-links {
+        display: flex;
+        gap: 10px;
+    }
+
+    .nav-button {
+        font-size: 0.9em;
+        padding: 6px 14px;
+        background-color: #3e9db3;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-style: italic;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+        .nav-button:hover {
+            background-color: #2c7d91;
+            transform: translateY(-1px);
+        }
+
+    .logout-link {
+        font-size: 0.9em;
+        color: #3e9db3;
+        font-style: italic;
+        text-decoration: none;
+        align-self: flex-end;
+    }
+
+        .logout-link:hover {
+            text-decoration: underline;
+            color: #2c7d91;
+        }
+
+
+    .main-section {
+        padding: 40px 20px;
+        text-align: center;
+        background-color: #fff;
+    }
+
+    .admin-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        font-style: italic;
+        color: #2a3b47;
+        margin-bottom: 20px;
+    }
+
+    .admin-section {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #f5f9f9;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .form-button {
+        padding: 12px 28px;
+        background-color: #3e9db3;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-style: italic;
+        font-size: 1em;
+        box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.15);
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .form-button:hover {
+            background-color: #2c7d91;
+        }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .admin-table th {
+            background-color: #d7e6e9;
+        }
+
+    .promo-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .promo-form {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .promo-image {
+        flex: 1;
+        text-align: center;
+    }
+
+        .promo-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+    .massage-logo {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .small-btn {
+        padding: 6px 12px;
+        font-size: 0.85em;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        width: 350px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+</style>
+
+<header class="custom-header">
+    <div class="header-left">Admin Panel</div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="header-right">
+            <span class="welcome-text">Welcome, <strong>@userName</strong></span>
+            <div class="header-links">
+                <a asp-controller="Auth" asp-action="AdminPage" class="logout-link">Home</a>
+                <a asp-controller="Therapist" asp-action="Therapist" class="logout-link">Therapist Page</a>
+                <a asp-controller="Promos" asp-action="Promo" class="logout-link">Promo Code</a>
+                <a asp-controller="Auth" asp-action="Logout" class="logout-link">Logout</a>
+            </div>
+        </div>
+    }
+</header>
+
+<section class="main-section">
+    <div class="admin-title">
+        Manage Promo Codes
+    </div>
+    <div class="admin-section">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Discount (%)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="promoTable">
+                <!-- JS will populate this -->
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Add/Edit Promo Modal -->
+<div id="promoModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h3 id="modalTitle">Add Promo Code</h3>
+        <div class="form-group">
+            <label>Code</label>
+            <input type="text" id="promoCode" class="form-control" placeholder="e.g. SAVE10" />
+        </div>
+        <div class="form-group">
+            <label>Discount (%)</label>
+            <input type="number" id="promoDiscount" class="form-control" placeholder="e.g. 15" min="1" max="100" />
+        </div>
+        <div class="form-group">
+            <label>Status</label>
+            <select id="promoStatus" class="form-control">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+        </div>
+        <div style="margin-top: 10px;">
+            <button class="form-button small-btn" id="promoSubmitButton" onclick="addPromo()">Add</button>
+            <button class="form-button small-btn" style="background:#aaa;" onclick="closePromoModal()">Cancel</button>
+        </div>
+        <p id="promoMsg" style="margin-top: 10px;"></p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let editingCode = null;
+
+        async function loadPromos() {
+            const table = document.getElementById("promoTable");
+            table.innerHTML = "";
+
+            try {
+                const res = await fetch("/api/promo/list");
+                if (!res.ok) throw new Error("Failed to load promo codes.");
+                const promos = await res.json();
+
+                if (!promos.length) {
+                    table.innerHTML = "<tr><td colspan='4'>No promo codes available.</td></tr>";
+                    return;
+                }
+
+                promos.forEach(p => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${p.code}</td>
+                        <td>${p.discountAmount}%</td>
+                        <td>${p.isActive ? "Active" : "Inactive"}</td>
+                        <td>
+                            <button class="form-button small-btn" onclick="editPromo('${p.code}', ${p.discountAmount}, ${p.isActive})">Edit</button>
+                            <button class="form-button small-btn" style="background:#c94c4c" onclick="deletePromo('${p.code}', this)">Delete</button>
+                            <button class="form-button small-btn" style="background:#3e9db3" onclick="sendPromoToUsers('${p.code}')">Send</button>
+                        </td>
+
+                    `;
+                    table.appendChild(row);
+                });
+            } catch (err) {
+                table.innerHTML = `<tr><td colspan='4'>❌ ${err.message}</td></tr>`;
+            }
+        }
+
+        function openPromoModal(isEdit = false) {
+            document.getElementById("promoModal").style.display = "flex";
+            document.getElementById("promoMsg").innerText = "";
+            if (!isEdit) {
+                editingCode = null;
+                document.getElementById("promoCode").value = "";
+                document.getElementById("promoCode").disabled = false;
+                document.getElementById("promoDiscount").value = "";
+                document.getElementById("promoStatus").value = "true";
+                document.getElementById("modalTitle").innerText = "Add Promo Code";
+                document.getElementById("promoSubmitButton").innerText = "Add";
+            }
+        }
+
+        function closePromoModal() {
+            document.getElementById("promoModal").style.display = "none";
+        }
+
+        async function addPromo() {
+            const code = document.getElementById("promoCode").value.trim();
+            const discount = parseFloat(document.getElementById("promoDiscount").value);
+            const isActive = document.getElementById("promoStatus").value === "true";
+            const msg = document.getElementById("promoMsg");
+
+            if (!code || isNaN(discount) || discount <= 0) {
+                msg.innerText = "⚠️ Please enter valid values.";
+                return;
+            }
+
+            const payload = JSON.stringify({ code, discountAmount: discount, isActive });
+            const url = editingCode ? `/api/promo/update/${editingCode}` : "/api/promo/create";
+            const method = editingCode ? "PUT" : "POST";
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: payload
+                });
+
+                const resultText = await res.text();
+                let result = {};
+                try { result = JSON.parse(resultText); } catch { result.message = resultText; }
+
+                if (!res.ok) {
+                    msg.innerText = "❌ " + (result.message || "An error occurred.");
+                    return;
+                }
+
+                msg.innerText = "✅ " + (result.message || "Success.");
+                closePromoModal();
+                loadPromos();
+            } catch (err) {
+                msg.innerText = "❌ " + err.message;
+            }
+        }
+
+        async function deletePromo(code, btn) {
+            if (!confirm(`Delete promo code "${code}"?`)) return;
+
+            try {
+                const res = await fetch(`/api/promo/delete/${code}`, { method: "DELETE" });
+                const resultText = await res.text();
+                if (!res.ok) throw new Error(resultText || "Failed to delete.");
+                btn.closest("tr").remove();
+            } catch (err) {
+                alert("❌ " + err.message);
+            }
+        }
+
+        function editPromo(code, discount, isActive) {
+            editingCode = code;
+            openPromoModal(true);
+            document.getElementById("promoCode").value = code;
+            document.getElementById("promoCode").disabled = true;
+            document.getElementById("promoDiscount").value = discount;
+            document.getElementById("promoStatus").value = isActive.toString();
+            document.getElementById("modalTitle").innerText = "Edit Promo Code";
+            document.getElementById("promoSubmitButton").innerText = "Update";
+        }
+
+        document.addEventListener("DOMContentLoaded", loadPromos);
+
+        async function sendPromoToUsers(code) {
+            if (!confirm(`Send promo code "${code}" to all users?`)) return;
+
+            try {
+                const res = await fetch(`/api/promo/send/${code}`, { method: "POST" });
+                const resultText = await res.text();
+                let result = {};
+                try { result = JSON.parse(resultText); } catch { result.message = resultText; }
+
+                if (!res.ok) {
+                    alert("❌ " + (result.message || "Failed to send promo."));
+                    return;
+                }
+
+                alert("✅ " + (result.message || "Promo sent to users."));
+            } catch (err) {
+                alert("❌ " + err.message);
+            }
+        }
+
+    </script>
+}

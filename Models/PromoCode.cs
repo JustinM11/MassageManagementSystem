@@ -4,7 +4,8 @@
     {
         public int Id { get; set; }
         public string Code { get; set; }
-        public decimal DiscountAmount { get; set; }
-        public bool IsActive { get; set; }
+        public int DiscountAmount { get; set; }
+        // Set default status to false (inactive)
+        public bool IsActive { get; set; } = false;
     }
 }

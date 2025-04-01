@@ -119,11 +119,13 @@ namespace MassageManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TherapistId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
                 });
@@ -138,8 +140,8 @@ namespace MassageManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<int>("DiscountAmount")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
@@ -153,7 +155,7 @@ namespace MassageManagementSystem.Migrations
                         {
                             Id = 1,
                             Code = "WELCOME10",
-                            DiscountAmount = 10m,
+                            DiscountAmount = 10,
                             IsActive = true
                         });
                 });
@@ -330,7 +332,13 @@ namespace MassageManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MassageManagementSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Therapist");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -28,5 +28,6 @@
 
         // 🔽 Navigation property
         public Therapists? Therapist { get; set; }
+        public ApplicationUser? User { get; set; }
     }
 }

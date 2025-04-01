@@ -62,20 +62,76 @@ namespace MassageManagementSystem.Controllers
         public async Task<IActionResult> GetAllBookings()
         {
             var bookings = await _context.Bookings
-                .Include(b => b.Therapist) // This brings in the related therapist
+                .Include(b => b.Therapist)
+                .Include(b => b.User) // <-- Make sure this includes the user entity
                 .ToListAsync();
 
             var result = bookings.Select(b => new
             {
                 b.Name,
-                b.UserId,
+                Email = b.User?.Email ?? "—", // Fallback for guest
+                TherapistName = b.Therapist?.Name ?? "N/A",
                 b.AppointmentTime,
                 b.IsConfirmed,
-                TherapistName = b.Therapist != null ? b.Therapist.Name : "Unknown"
+                b.Id
             });
 
             return Ok(result);
         }
+
+
+        [HttpPut("update-status/{id}")]
+        public async Task<IActionResult> UpdateBookingStatus(int id, [FromBody] Booking update)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.User)
+                .Include(b => b.Therapist)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (booking == null)
+                return NotFound(new { message = "Booking not found." });
+
+            booking.IsConfirmed = update.IsConfirmed;
+            await _context.SaveChangesAsync();
+
+            var recipientEmail = booking.User?.Email ?? booking.Email;
+
+            if (update.IsConfirmed && !string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                var emailBody = $@"
+            <h3>Thank you for Booking with us, {booking.Name}!</h3>
+            <p>Your massage session with <strong>{booking.Therapist?.Name ?? "your therapist"}</strong> is now <strong>Completed</strong>.</p>
+            <p><strong>Date:</strong> {booking.AppointmentTime:MMMM dd, yyyy - h:mm tt}</p>
+            <p><strong>Status:</strong> ✅ PAID</p>
+            <br />
+            <p>We appreciate your trust in Healing Massage. Hope to see you again soon!</p>";
+
+                await _emailService.SendEmailAsync(
+                    recipientEmail,
+                    "✅ Booking Completed – Healing Massage",
+                    emailBody
+                );
+            }
+
+            return Ok(new { message = "Booking status updated successfully." });
+        }
+
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+
+            if (booking == null)
+                return NotFound("Booking not found.");
+
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+
+            return Ok("Booking deleted successfully.");
+        }
+
+
 
 
     }
